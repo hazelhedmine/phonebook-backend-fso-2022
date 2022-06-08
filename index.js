@@ -53,8 +53,23 @@ app.delete("/api/persons/:id", (request, response) => {
 
 app.post("/api/persons", (request, response) => {
   const id = Math.floor(Math.random() * 10000 + 1);
-  const person = request.body;
-  person.id = id;
+  const body = request.body;
+
+  if (!body.name) {
+    return response.status(400).json({
+      error: "name is missing",
+    });
+  } else if (!body.number) {
+    return response.status(400).json({
+      error: "number is missing",
+    });
+  }
+
+  const person = {
+    id: id,
+    name: body.name,
+    number: body.number,
+  };
 
   persons = persons.concat(person);
   console.log(person);
