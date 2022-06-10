@@ -1,3 +1,5 @@
+// for exercise 3.12
+
 const mongoose = require("mongoose");
 
 if (process.argv.length != 5 && process.argv.length != 3) {
