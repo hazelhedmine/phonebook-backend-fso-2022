@@ -16,6 +16,48 @@ app.use(
 app.use(cors());
 app.use(express.static("build"));
 
+app.get("/api/persons/:id", (request, response) => {
+  Person.findById(request.params.id).then((person) => {
+    response.json(person);
+  });
+});
+
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id).then((result) => {
+    // successfully deleting returns 204 no content
+    response.status(204).end();
+  });
+  // .catch(error => next(error))
+});
+
+app.post("/api/persons", (request, response) => {
+  const body = request.body;
+
+  if (body.name === undefined) {
+    return response.status(400).json({ error: "name missing" });
+  } else if (body.number === undefined) {
+    return response.status(400).json({ error: "number missing" });
+  }
+
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  });
+
+  // response sent inside of the callback function for the save operation
+  // ensures that the response is sent only if the operation succeeded
+  person.save().then((savedPerson) => {
+    // using the formatted version created with toJSON
+    response.json(savedPerson);
+  });
+});
+
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// ------------------- before mongoDB
 // let persons = [
 //   {
 //     id: 1,
@@ -39,15 +81,15 @@ app.use(express.static("build"));
 //   },
 // ];
 
-app.get("/", (request, response) => {
-  response.send("<h1>Hello World!</h1>");
-});
+// app.get("/", (request, response) => {
+//   response.send("<h1>Hello World!</h1>");
+// });
 
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((persons) => {
-    response.json(persons);
-  });
-});
+// app.get("/api/persons", (request, response) => {
+//   Person.find({}).then((persons) => {
+//     response.json(persons);
+//   });
+// });
 
 // app.get("/api/persons/:id", (request, response) => {
 //   const id = Number(request.params.id);
@@ -59,18 +101,12 @@ app.get("/api/persons", (request, response) => {
 //   }
 // });
 
-app.get("/api/persons/:id", (request, response) => {
-  Person.findById(request.params.id).then((person) => {
-    response.json(person);
-  });
-});
+// app.delete("/api/persons/:id", (request, response) => {
+//   const id = Number(request.params.id);
+//   persons = persons.filter((person) => person.id !== id);
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((person) => person.id !== id);
-
-  response.status(204).end();
-});
+//   response.status(204).end();
+// });
 
 // app.post("/api/persons", (request, response) => {
 //   const id = Math.floor(Math.random() * 10000 + 1);
@@ -98,35 +134,8 @@ app.delete("/api/persons/:id", (request, response) => {
 //   response.json(person);
 // });
 
-app.post("/api/persons", (request, response) => {
-  const body = request.body;
-
-  if (body.name === undefined) {
-    return response.status(400).json({ error: "name missing" });
-  } else if (body.number === undefined) {
-    return response.status(400).json({ error: "number missing" });
-  }
-
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
-
-  // response sent inside of the callback function for the save operation
-  // ensures that the response is sent only if the operation succeeded
-  person.save().then((savedPerson) => {
-    // using the formatted version created with toJSON
-    response.json(savedPerson);
-  });
-});
-
-app.get("/info", (request, response) => {
-  const number = persons.length;
-  const date = new Date();
-  response.send(`<p>Phonebook has info for ${number} people</p><p>${date}</p>`);
-});
-
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// app.get("/info", (request, response) => {
+//   const number = persons.length;
+//   const date = new Date();
+//   response.send(`<p>Phonebook has info for ${number} people</p><p>${date}</p>`);
+// });
